@@ -19,6 +19,10 @@ import java.util.Map;
 import java.util.Objects;
 
 public class JavaConvention implements Plugin<Project> {
+  private static final String DEFAULT_SUPPRESSIONS = Objects.requireNonNull(
+    JavaConvention.class.getResource("/checkstyle/suppressions.xml")
+  ).toExternalForm();
+
   @Override
   public void apply(Project project) {
     final StrokkConventionExtension ext = project.getExtensions().create("strokkConventions", StrokkConventionExtension.class);
@@ -60,17 +64,18 @@ public class JavaConvention implements Plugin<Project> {
     }
 
     if (project.getPlugins().hasPlugin("checkstyle")) {
+      project.getRepositories().mavenCentral();
       project.getExtensions().<CheckstyleExtension>configure("checkstyle", checkstyle -> {
         checkstyle.setToolVersion("13.4.2");
         checkstyle.setConfig(project.getResources().getText().fromUri(
           Objects.requireNonNull(JavaConvention.class.getResource("/checkstyle/checkstyle.xml"))
         ));
 
-        if (ext.checkstyleConvention.suppressionFile.isPresent()) {
-          checkstyle.setConfigProperties(Map.of(
-            "suppressionFile", ext.checkstyleConvention.suppressionFile.get().getAsFile().getAbsolutePath()
-          ));
-        }
+        final String suppressionFile = ext.checkstyleConvention.suppressionFile
+          .map(f -> f.getAsFile().getAbsolutePath())
+          .getOrElse(DEFAULT_SUPPRESSIONS);
+
+        checkstyle.setConfigProperties(Map.of("suppressionFile", suppressionFile));
       });
     }
   }

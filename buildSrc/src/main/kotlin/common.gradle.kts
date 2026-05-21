@@ -8,7 +8,7 @@ repositories {
 }
 
 java {
-  toolchain.languageVersion = JavaLanguageVersion.of(21)
+  toolchain.languageVersion = JavaLanguageVersion.of(17)
 }
 
 publishing {
@@ -23,13 +23,9 @@ publishing {
   }
 }
 
-java {
-  toolchain.languageVersion = JavaLanguageVersion.of(25)
-}
-
 tasks {
   withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-parameters")
-    options.release = 25;
+    options.release = 17;
   }
 }
